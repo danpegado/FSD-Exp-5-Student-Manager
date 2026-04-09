@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Student Manager</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="grid-overlay" aria-hidden="true"></div>
+
+	<main class="dashboard">
+		<header class="glass-panel header-block">
+			<h1>STUDENT MANAGER</h1>
+			<p>Syncing records...</p>
+		</header>
+
+		<section class="glass-panel toolbar" aria-label="Toolbar">
+			<div class="search-shell">
+				<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+				<input id="searchInput" type="search" placeholder="Search students by name, email, user ID, age, or hobbies" aria-label="Search students">
+			</div>
+			<div class="toolbar-actions">
+				<button id="exportBtn" type="button" class="btn btn-secondary">Export Data</button>
+				<button id="openModalBtn" type="button" class="btn btn-primary">Add New Student</button>
+			</div>
+		</section>
+
+		<section class="glass-panel table-panel">
+			<div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th><input id="selectAllRows" type="checkbox" aria-label="Select all rows"></th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Age</th>
+							<th>Hobbies</th>
+							<th>Bio</th>
+							<th>User ID</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody id="studentsTableBody"></tbody>
+				</table>
+			</div>
+			<footer class="table-footer">
+				<span id="rowCountText">Rows per page: 10 of 0 records</span>
+			</footer>
+		</section>
+	</main>
+
+	<div id="studentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+		<div class="modal-backdrop" data-close="modal"></div>
+		<section class="modal-card glass-panel" aria-label="Add New Student Form">
+			<div class="modal-head">
+				<h2 id="modalTitle">Add New Student</h2>
+				<button id="closeModalBtn" class="icon-close" type="button" aria-label="Close modal">
+					<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+				</button>
+			</div>
+
+			<form id="studentForm" novalidate>
+				<label for="name">Name</label>
+				<input id="name" name="name" type="text" minlength="3" required placeholder="Enter full student name (minimum 3 characters)">
+
+				<label for="email">Email</label>
+				<input id="email" name="email" type="email" required placeholder="Enter a valid email address">
+
+				<label for="age">Age</label>
+				<input id="age" name="age" type="number" min="0" max="120" required placeholder="Enter age between 0 and 120">
+
+				<label for="hobbies">Hobbies</label>
+				<input id="hobbies" name="hobbies" type="text" required placeholder="Enter hobbies separated by commas">
+
+				<label for="bio">Bio</label>
+				<textarea id="bio" name="bio" rows="3" required placeholder="Write a concise student profile"></textarea>
+
+				<label for="userId">User ID</label>
+				<input id="userId" name="userId" type="text" required placeholder="Enter unique student identifier">
+
+				<button id="submitBtn" type="submit" class="btn btn-primary submit-btn">Add New Student</button>
+			</form>
+		</section>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+</html>
