@@ -1,4 +1,15 @@
-const API_BASE = "http://localhost:3000";
+const API_BASE = (() => {
+	const configuredBase = document
+		.querySelector('meta[name="api-base"]')
+		?.getAttribute("content");
+
+	if (configuredBase) {
+		return configuredBase.replace(/\/$/, "");
+	}
+
+	const isLocalhost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+	return isLocalhost ? "http://localhost:3000/api" : "/api";
+})();
 
 const studentForm = document.getElementById("studentForm");
 const studentsTableBody = document.getElementById("studentsTableBody");

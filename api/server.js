@@ -105,7 +105,11 @@ function handleApiError(error, res) {
 	return res.status(500).json({ message: "Internal Server Error" });
 }
 
-app.get("/users", async (_req, res) => {
+function routePaths(basePath) {
+	return [basePath, `/api${basePath}`];
+}
+
+app.get(routePaths("/users"), async (_req, res) => {
 	try {
 		const users = await User.find();
 		return res.status(200).json(users);
@@ -114,7 +118,7 @@ app.get("/users", async (_req, res) => {
 	}
 });
 
-app.post("/addUser", async (req, res) => {
+app.post(routePaths("/addUser"), async (req, res) => {
 	try {
 		const payload = normalizePayload(req.body);
 		const user = new User(payload);
@@ -125,7 +129,7 @@ app.post("/addUser", async (req, res) => {
 	}
 });
 
-app.put("/updateUser/:id", async (req, res) => {
+app.put(routePaths("/updateUser/:id"), async (req, res) => {
 	try {
 		const payload = normalizePayload(req.body);
 		const updatedUser = await User.findByIdAndUpdate(req.params.id, payload, {
@@ -143,7 +147,7 @@ app.put("/updateUser/:id", async (req, res) => {
 	}
 });
 
-app.delete("/deleteUser/:id", async (req, res) => {
+app.delete(routePaths("/deleteUser/:id"), async (req, res) => {
 	try {
 		const deletedUser = await User.findByIdAndDelete(req.params.id);
 
