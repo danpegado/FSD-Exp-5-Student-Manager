@@ -12,22 +12,32 @@ app.use(cors());
 app.use(express.json());
 
 const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+let mongoConnectionPromise = null;
 
-if (!mongoUri) {
-	console.error(
-		"Missing MongoDB URI. Add MONGODB_URI (or MONGO_URI) to your .env file."
-	);
-	process.exit(1);
+async function connectToDatabase() {
+	if (!mongoUri) {
+		throw new Error("Missing MONGODB_URI or MONGO_URI environment variable");
+	}
+
+	if (mongoose.connection.readyState === 1) {
+		return mongoose.connection;
+	}
+
+	if (!mongoConnectionPromise) {
+		mongoConnectionPromise = mongoose
+			.connect(mongoUri)
+			.then(() => {
+				console.log("Connected to MongoDB Atlas");
+				return mongoose.connection;
+			})
+			.catch((error) => {
+				mongoConnectionPromise = null;
+				throw error;
+			});
+	}
+
+	return mongoConnectionPromise;
 }
-
-mongoose
-	.connect(mongoUri)
-	.then(() => {
-		console.log("✅ Connected to MongoDB Atlas");
-	})
-	.catch((error) => {
-		console.error("MongoDB connection error:", error);
-	});
 
 const userSchema = new mongoose.Schema({
 	name: {
@@ -85,6 +95,17 @@ function normalizePayload(payload) {
 }
 
 function handleApiError(error, res) {
+	if (error.message && error.message.includes("MONGODB_URI")) {
+		return res.status(500).json({ message: error.message });
+	}
+
+	if (error.name === "MongooseServerSelectionError") {
+		return res.status(500).json({
+			message:
+				"Database connection failed. Check MongoDB URI, network access, and Atlas IP allow list."
+		});
+	}
+
 	if (error instanceof mongoose.Error.CastError) {
 		return res.status(400).json({ message: "Invalid ID format" });
 	}
@@ -111,6 +132,7 @@ function routePaths(basePath) {
 
 app.get(routePaths("/users"), async (_req, res) => {
 	try {
+		await connectToDatabase();
 		const users = await User.find();
 		return res.status(200).json(users);
 	} catch (error) {
@@ -120,6 +142,7 @@ app.get(routePaths("/users"), async (_req, res) => {
 
 app.post(routePaths("/addUser"), async (req, res) => {
 	try {
+		await connectToDatabase();
 		const payload = normalizePayload(req.body);
 		const user = new User(payload);
 		const savedUser = await user.save();
@@ -131,6 +154,7 @@ app.post(routePaths("/addUser"), async (req, res) => {
 
 app.put(routePaths("/updateUser/:id"), async (req, res) => {
 	try {
+		await connectToDatabase();
 		const payload = normalizePayload(req.body);
 		const updatedUser = await User.findByIdAndUpdate(req.params.id, payload, {
 			new: true,
@@ -149,6 +173,7 @@ app.put(routePaths("/updateUser/:id"), async (req, res) => {
 
 app.delete(routePaths("/deleteUser/:id"), async (req, res) => {
 	try {
+		await connectToDatabase();
 		const deletedUser = await User.findByIdAndDelete(req.params.id);
 
 		if (!deletedUser) {
